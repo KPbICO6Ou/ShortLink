@@ -2,12 +2,12 @@
 
 ---
 
-## v0.1.0 — MVP (1 day)
+## v0.1.0 — MVP (1 day) ✅
 
-- [ ] `pyproject.toml`, `src/shortlink/`
-- [ ] `GET /<slug>` returns 307 to the stored URL
-- [ ] In-memory `dict[str, str]` storage (not persistent yet)
-- [ ] Hard-coded seed link to prove the redirect works
+- [x] `pyproject.toml`, `src/shortlink/`
+- [x] `GET /<slug>` returns 307 to the stored URL
+- [x] In-memory `dict[str, str]` storage (not persistent yet)
+- [x] Hard-coded seed link to prove the redirect works
 
 Acceptance: `uvicorn shortlink:app` redirects `/hello` to `https://example.com`.
 

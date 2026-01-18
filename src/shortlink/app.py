@@ -1,17 +1,24 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
+from sqlmodel import Session
 
-# In-memory storage. Replaced by SQLite in v0.2.0.
-links: dict[str, str] = {
-    "hello": "https://example.com",
-}
+from shortlink.db import get_session, init_db
+from shortlink.models import Link
 
-app = FastAPI(title="shortlink", version="0.1.0")
+app = FastAPI(title="shortlink", version="0.2.0")
+
+
+@app.on_event("startup")
+def _startup() -> None:
+    init_db()
 
 
 @app.get("/{slug}")
-def redirect(slug: str) -> RedirectResponse:
-    target = links.get(slug)
-    if target is None:
+def redirect(slug: str, session: Session = Depends(get_session)) -> RedirectResponse:
+    link = session.get(Link, slug)
+    if link is None:
         raise HTTPException(status_code=404, detail="slug not found")
-    return RedirectResponse(url=target, status_code=307)
+    link.hits += 1
+    session.add(link)
+    session.commit()
+    return RedirectResponse(url=link.target, status_code=307)

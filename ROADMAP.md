@@ -13,12 +13,12 @@ Acceptance: `uvicorn shortlink:app` redirects `/hello` to `https://example.com`.
 
 ---
 
-## v0.2.0 — SQLite persistence (1 day)
+## v0.2.0 — SQLite persistence (1 day) ✅
 
-- [ ] `sqlmodel` schema: `Link(slug, target, created_at, hits)`
-- [ ] `shortlink init` creates the DB at `$SHORTLINK_DB_PATH`
-- [ ] `GET /<slug>` reads from DB and increments `hits`
-- [ ] base62 slug generator, length configurable
+- [x] `sqlmodel` schema: `Link(slug, target, created_at, hits)`
+- [x] `shortlink init` creates the DB at `$SHORTLINK_DB_PATH`
+- [x] `GET /<slug>` reads from DB and increments `hits`
+- [x] base62 slug generator, length configurable
 
 ---
 

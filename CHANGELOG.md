@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- v0.3.0 Admin CLI on branch `feat/v0.3.0-admin-cli`:
+  - Full `typer` command set: `add`, `ls`, `rm`, `rename`, `export`,
+    `import`, in addition to the existing `init`.
+  - `ls` renders a `rich` table sorted by `created_at` descending,
+    showing slug, target, hits, and created date.
+  - `add` auto-generates a base62 slug of `SHORTLINK_SLUG_LENGTH` and
+    retries up to 10 times if it collides; otherwise honours `--slug`.
+  - Duplicate-slug rejection on both `add` and `rename`.
+  - URL validation via `httpx.URL`: scheme must be http/https and the
+    URL must have a host. Invalid input fails with a typer BadParameter
+    so the exit code is 2.
+  - `export` writes every link to a four-column CSV
+    (`slug,target,created_at,hits`); `import` reads such a CSV and
+    skips slugs that already exist.
+
 - v0.2.0 SQLite persistence on branch `feat/v0.2.0-sqlite`:
   - `Link(slug, target, created_at, hits)` model via `sqlmodel`.
   - `shortlink.config.Settings` (pydantic-settings) reads

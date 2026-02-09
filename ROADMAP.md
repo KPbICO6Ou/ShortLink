@@ -22,12 +22,12 @@ Acceptance: `uvicorn shortlink:app` redirects `/hello` to `https://example.com`.
 
 ---
 
-## v0.3.0 — Admin CLI (1 day)
+## v0.3.0 — Admin CLI (1 day) ✅
 
-- [ ] `typer`-based CLI: `add`, `ls`, `rm`, `rename`
-- [ ] Pretty table output via `rich`
-- [ ] Reject duplicate slugs, validate URLs with `httpx`
-- [ ] CSV export / import
+- [x] `typer`-based CLI: `add`, `ls`, `rm`, `rename`
+- [x] Pretty table output via `rich`
+- [x] Reject duplicate slugs, validate URLs with `httpx`
+- [x] CSV export / import
 
 ---
 

@@ -31,12 +31,12 @@ Acceptance: `uvicorn shortlink:app` redirects `/hello` to `https://example.com`.
 
 ---
 
-## v0.4.0 — Admin HTTP API (1 day)
+## v0.4.0 — Admin HTTP API (1 day) ✅
 
-- [ ] `POST /api/links`, `DELETE /api/links/<slug>`, `GET /api/links`
-- [ ] `X-Admin-Token` header check via FastAPI dependency
-- [ ] Pydantic request/response models
-- [ ] OpenAPI docs at `/docs` enabled in dev, disabled in prod
+- [x] `POST /api/links`, `DELETE /api/links/<slug>`, `GET /api/links`
+- [x] `X-Admin-Token` header check via FastAPI dependency
+- [x] Pydantic request/response models
+- [x] OpenAPI docs at `/docs` enabled in dev, disabled in prod
 
 ---
 

@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- v0.4.0 Admin HTTP API on branch `feat/v0.4.0-admin-api`:
+  - `POST /api/links`, `GET /api/links`, `DELETE /api/links/{slug}`
+    under an `admin` OpenAPI tag, all gated by an `X-Admin-Token`
+    FastAPI dependency that compares against `SHORTLINK_ADMIN_TOKEN`.
+  - Pydantic request/response models (`LinkCreate`, `LinkRead`) with
+    `HttpUrl` validation — invalid targets return 422.
+  - `SHORTLINK_ENABLE_DOCS` flag controls `/docs`, `/redoc`, and
+    `/openapi.json`; defaults to off so production deployments don't
+    leak the admin schema.
+  - App construction moved to a `create_app()` factory and a FastAPI
+    lifespan handler so the same module supports both `uvicorn
+    shortlink:app` and per-test app instances.
+
 - v0.3.0 Admin CLI on branch `feat/v0.3.0-admin-cli`:
   - Full `typer` command set: `add`, `ls`, `rm`, `rename`, `export`,
     `import`, in addition to the existing `init`.

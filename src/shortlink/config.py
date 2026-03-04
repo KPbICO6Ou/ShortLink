@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     base_url: str = "http://localhost:8000"
     admin_token: str = "change-me-please"
     slug_length: int = 4
+    enable_docs: bool = False
 
     @property
     def db_url(self) -> str:

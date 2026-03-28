@@ -40,12 +40,12 @@ Acceptance: `uvicorn shortlink:app` redirects `/hello` to `https://example.com`.
 
 ---
 
-## v0.5.0 — Stats + health (1 day)
+## v0.5.0 — Stats + health (1 day) ✅
 
-- [ ] Per-day hit table (`HitDaily(slug, date, count)`)
-- [ ] `shortlink stats <slug> --days N` prints a histogram
-- [ ] `shortlink health` runs HEAD requests against every target
-- [ ] `GET /qr/<slug>` returns a PNG QR code (uses `qrcode[pil]`)
+- [x] Per-day hit table (`HitDaily(slug, date, count)`)
+- [x] `shortlink stats <slug> --days N` prints a histogram
+- [x] `shortlink health` runs HEAD requests against every target
+- [x] `GET /qr/<slug>` returns a PNG QR code (uses `qrcode[pil]`)
 
 ---
 

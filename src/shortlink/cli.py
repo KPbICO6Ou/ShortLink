@@ -1,4 +1,5 @@
 import csv
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import httpx
@@ -9,7 +10,7 @@ from sqlmodel import Session, select
 
 from shortlink.config import get_settings
 from shortlink.db import get_engine, init_db
-from shortlink.models import Link
+from shortlink.models import HitDaily, Link
 from shortlink.slugs import generate_slug
 
 app = typer.Typer(help="shortlink admin CLI", no_args_is_help=True)
@@ -162,6 +163,68 @@ def import_(path: Path = typer.Argument(..., help="Input CSV path")) -> None:
             added += 1
         session.commit()
     console.print(f"imported [green]{added}[/green], skipped [yellow]{skipped}[/yellow]")
+
+
+@app.command("stats")
+def stats(
+    slug: str = typer.Argument(...),
+    days: int = typer.Option(7, "--days", "-d", min=1, max=365),
+) -> None:
+    """Print a per-day hit histogram for the slug over the last N days."""
+    init_db()
+    today = datetime.now(timezone.utc).date()
+    start = today - timedelta(days=days - 1)
+    with Session(get_engine()) as session:
+        if session.get(Link, slug) is None:
+            console.print(f"[red]no such slug:[/red] {slug}")
+            raise typer.Exit(code=1)
+        rows = session.exec(
+            select(HitDaily)
+            .where(HitDaily.slug == slug)
+            .where(HitDaily.day >= start)
+        ).all()
+    counts = {r.day: r.count for r in rows}
+    peak = max(counts.values(), default=0) or 1
+    bar_width = 40
+    for i in range(days):
+        d = start + timedelta(days=i)
+        c = counts.get(d, 0)
+        bar = "█" * int(round(c / peak * bar_width))
+        console.print(f"{d.isoformat()}  {c:>4}  [cyan]{bar}[/cyan]")
+
+
+@app.command("health")
+def health(
+    timeout: float = typer.Option(5.0, "--timeout", help="Per-request timeout, seconds"),
+) -> None:
+    """HEAD-check every target URL; report dead links."""
+    init_db()
+    with Session(get_engine()) as session:
+        links = session.exec(select(Link)).all()
+
+    table = Table(title="health check")
+    table.add_column("slug", style="cyan")
+    table.add_column("target")
+    table.add_column("status", justify="right")
+    dead = 0
+    with httpx.Client(follow_redirects=True, timeout=timeout) as client:
+        for link in links:
+            try:
+                r = client.head(link.target)
+                status = str(r.status_code)
+                if r.status_code >= 400:
+                    dead += 1
+                    status = f"[red]{status}[/red]"
+                else:
+                    status = f"[green]{status}[/green]"
+            except httpx.HTTPError as exc:
+                status = f"[red]error: {type(exc).__name__}[/red]"
+                dead += 1
+            table.add_row(link.slug, link.target, status)
+    console.print(table)
+    if dead:
+        console.print(f"[yellow]{dead} dead link(s)[/yellow]")
+        raise typer.Exit(code=1)
 
 
 def main() -> None:

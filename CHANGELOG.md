@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- v0.5.0 Stats, health and QR codes on branch `feat/v0.5.0-stats-health`:
+  - New `HitDaily(slug, day, count)` table; every successful redirect
+    upserts the (slug, today) row in the same transaction that bumps
+    `Link.hits`. Field is named `day`, not `date`, to avoid a name clash
+    with the `datetime.date` annotation that breaks pydantic v2.
+  - `shortlink stats <slug> --days N` prints a per-day text histogram
+    scaled to the largest bucket; fails non-zero if the slug is unknown.
+  - `shortlink health [--timeout S]` issues HEAD requests against every
+    target via `httpx` (following redirects), renders a rich table
+    with colour-coded statuses, and exits non-zero if anything is dead.
+  - `GET /qr/<slug>` returns a PNG QR code that encodes
+    `SHORTLINK_BASE_URL/<slug>`, sourced from `qrcode[pil]`.
+
 - v0.4.0 Admin HTTP API on branch `feat/v0.4.0-admin-api`:
   - `POST /api/links`, `GET /api/links`, `DELETE /api/links/{slug}`
     under an `admin` OpenAPI tag, all gated by an `X-Admin-Token`

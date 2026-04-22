@@ -1,0 +1,23 @@
+[Unit]
+Description=shortlink — self-hosted URL shortener
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/shortlink
+EnvironmentFile=%h/shortlink/.env
+ExecStart=%h/.local/bin/uvicorn shortlink:app --host 127.0.0.1 --port 8000
+Restart=on-failure
+RestartSec=5
+
+# Lock the unit down a bit. It's a user service, so a lot of the heavy
+# sandboxing options are already implicit.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=%h/shortlink
+ProtectHome=read-only
+
+[Install]
+WantedBy=default.target

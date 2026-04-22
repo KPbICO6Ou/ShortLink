@@ -49,12 +49,12 @@ Acceptance: `uvicorn shortlink:app` redirects `/hello` to `https://example.com`.
 
 ---
 
-## v0.6.0 — Deployment polish (1 day)
+## v0.6.0 — Deployment polish (1 day) ✅
 
-- [ ] `systemd` user-service unit file
-- [ ] Caddyfile and Nginx samples in `deploy/`
-- [ ] Dockerfile + docker-compose for "run on any host in 30 seconds"
-- [ ] Backup script: nightly `sqlite3 .backup`
+- [x] `systemd` user-service unit file
+- [x] Caddyfile and Nginx samples in `deploy/`
+- [x] Dockerfile + docker-compose for "run on any host in 30 seconds"
+- [x] Backup script: nightly `sqlite3 .backup`
 
 ---
 

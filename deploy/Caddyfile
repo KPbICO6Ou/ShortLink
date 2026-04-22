@@ -1,0 +1,16 @@
+# Drop this into /etc/caddy/Caddyfile (or `import` it from there).
+# Caddy will obtain a Let's Encrypt cert automatically the first time
+# the hostname resolves to this machine.
+
+ymi.link {
+    encode gzip zstd
+
+    # Hide the admin surface from the public internet. Adjust to your
+    # management network or remove if you front the API differently.
+    @admin path /api/* /docs /redoc /openapi.json
+    handle @admin {
+        respond 404
+    }
+
+    reverse_proxy 127.0.0.1:8000
+}

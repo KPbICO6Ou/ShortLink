@@ -1,0 +1,19 @@
+services:
+  shortlink:
+    build: .
+    image: shortlink:local
+    container_name: shortlink
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      SHORTLINK_DB_PATH: /data/shortlink.sqlite
+      SHORTLINK_BASE_URL: ${SHORTLINK_BASE_URL:-http://localhost:8000}
+      SHORTLINK_ADMIN_TOKEN: ${SHORTLINK_ADMIN_TOKEN:?set it in .env}
+      SHORTLINK_SLUG_LENGTH: ${SHORTLINK_SLUG_LENGTH:-4}
+      SHORTLINK_ENABLE_DOCS: ${SHORTLINK_ENABLE_DOCS:-false}
+    volumes:
+      - shortlink-data:/data
+
+volumes:
+  shortlink-data:

@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- v0.6.0 Deployment polish on branch `feat/v0.6.0-deploy`:
+  - `deploy/shortlink.service` — systemd user-unit running
+    `uvicorn shortlink:app` against `~/shortlink/.env`, with
+    `NoNewPrivileges`, `PrivateTmp`, `ProtectSystem=strict` and a
+    narrow `ReadWritePaths`.
+  - `deploy/Caddyfile` — production-style reverse-proxy with
+    automatic TLS and a `respond 404` block over `/api`, `/docs`,
+    `/redoc`, `/openapi.json` so the admin surface never leaks to
+    the public web.
+  - `deploy/nginx.conf` — equivalent nginx server block (HTTP→HTTPS
+    redirect, commented certbot lines, same admin-path block).
+  - `Dockerfile` — slim python:3.12 image, cached pip layer, default
+    SQLite path at `/data/shortlink.sqlite`, exposes 8000.
+  - `docker-compose.yml` — single-service stack bound to
+    `127.0.0.1:8000` (intended to live behind Caddy/Nginx),
+    persistent named volume `shortlink-data`, env file template.
+  - `deploy/backup.sh` — nightly `sqlite3 .backup` snapshot with
+    timestamped filenames, gzip compression, and a retention prune.
+
 - v0.5.0 Stats, health and QR codes on branch `feat/v0.5.0-stats-health`:
   - New `HitDaily(slug, day, count)` table; every successful redirect
     upserts the (slug, today) row in the same transaction that bumps

@@ -1,7 +1,6 @@
-from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
-
-from datetime import datetime, timezone
+from contextlib import asynccontextmanager
+from datetime import UTC, datetime
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
@@ -55,7 +54,7 @@ def create_app() -> FastAPI:
         link.hits += 1
         session.add(link)
 
-        today = datetime.now(timezone.utc).date()
+        today = datetime.now(UTC).date()
         daily = session.get(HitDaily, (slug, today))
         if daily is None:
             daily = HitDaily(slug=slug, day=today, count=1)

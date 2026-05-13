@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "shortlink"
-version = "0.6.0"
+version = "1.0.0"
 description = "Self-hosted URL shortener — FastAPI + SQLite + admin CLI."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -24,6 +24,9 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.5",
+    "mypy>=1.10",
 ]
 
 [project.scripts]
@@ -31,3 +34,25 @@ shortlink = "shortlink.cli:app"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/shortlink"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "W"]
+# B008 fires on every `= Depends(...)` and `= typer.Option(...)` default —
+# both are idiomatic in this codebase.
+# E741 (`l` is ambiguous) is a comprehension-variable nit we don't need.
+ignore = ["B008", "E741"]
+
+[tool.mypy]
+python_version = "3.11"
+strict_optional = true
+warn_unused_ignores = true
+ignore_missing_imports = true
+files = ["src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

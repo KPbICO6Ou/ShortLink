@@ -1,15 +1,15 @@
+from datetime import UTC, datetime
 from datetime import date as Date
-from datetime import datetime, timezone
 
 from sqlmodel import Field, SQLModel
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def _today() -> Date:
-    return datetime.now(timezone.utc).date()
+    return datetime.now(UTC).date()
 
 
 class Link(SQLModel, table=True):

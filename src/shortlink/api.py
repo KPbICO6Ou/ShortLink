@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Header, HTTPException, status
-from sqlmodel import Session, select
+from sqlmodel import Session, col, select
 
 from shortlink.config import Settings, get_settings
 from shortlink.db import get_session
@@ -23,7 +23,7 @@ def require_admin(
 
 @router.get("", response_model=list[LinkRead], dependencies=[Depends(require_admin)])
 def list_links(session: Session = Depends(get_session)) -> list[Link]:
-    return list(session.exec(select(Link).order_by(Link.created_at.desc())).all())
+    return list(session.exec(select(Link).order_by(col(Link.created_at).desc())).all())
 
 
 @router.post(

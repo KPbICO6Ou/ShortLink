@@ -58,12 +58,13 @@ Acceptance: `uvicorn shortlink:app` redirects `/hello` to `https://example.com`.
 
 ---
 
-## v1.0.0 — Release-ready
+## v1.0.0 — Release-ready ✅
 
-- [ ] CI: ruff + mypy + pytest (with `httpx.AsyncClient` test client)
-- [ ] CHANGELOG.md following Keep a Changelog
-- [ ] `pipx install shortlink`
-- [ ] Screenshots / asciinema in README
+- [x] CI: ruff + mypy + pytest (with `httpx.AsyncClient` test client)
+- [x] CHANGELOG.md following Keep a Changelog
+- [x] `pipx install shortlink`
+- [x] Screenshots / asciinema in README *(placeholders ready — populate
+      once a hosted demo exists)*
 
 ---
 

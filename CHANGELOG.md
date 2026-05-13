@@ -7,7 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
 
+_Nothing yet._
+
+## 1.0.0 — 2026-05-13
+
+First stable release. Squashes the v0.1.0 → v0.6.0 milestones into a
+single shippable artefact and adds release-readiness work on branch
+`release/v1.0.0`.
+
 ### Added
+
+- v1.0.0 Release readiness on branch `release/v1.0.0`:
+  - `tests/` suite using `pytest` + `pytest-asyncio` + `httpx.AsyncClient`
+    against an `ASGITransport`-backed app; covers redirect / hit
+    counting, 404 on missing slug, admin-token gating, create/delete,
+    auto-slug, and the QR PNG endpoint.
+  - `tests/conftest.py` exposes a `client` fixture that builds a fresh
+    `create_app()` per test with an isolated SQLite file under tmp_path.
+  - `pyproject.toml` gains `ruff`, `mypy`, `pytest-asyncio` dev extras
+    and `[tool.ruff]`/`[tool.mypy]`/`[tool.pytest.ini_options]` blocks.
+    `B008` and `E741` are ignored because `Depends(...)` in defaults is
+    idiomatic in FastAPI/typer code.
+  - `mypy` clean across the package — required swapping
+    `Model.col.desc()` for `col(Model.col).desc()` so the SQL construct
+    is visible to the type checker.
+  - `.github/workflows/ci.yml` runs ruff, mypy, and pytest on a 3.11 /
+    3.12 matrix on every push to main and every PR.
+  - `pipx install shortlink` is now wired through `[project.scripts]`
+    (the entrypoint was added in v0.2.0; this release confirms it).
 
 - v0.6.0 Deployment polish on branch `feat/v0.6.0-deploy`:
   - `deploy/shortlink.service` — systemd user-unit running

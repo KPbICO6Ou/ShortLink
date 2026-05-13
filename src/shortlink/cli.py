@@ -1,12 +1,12 @@
 import csv
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import httpx
 import typer
 from rich.console import Console
 from rich.table import Table
-from sqlmodel import Session, select
+from sqlmodel import Session, col, select
 
 from shortlink.config import get_settings
 from shortlink.db import get_engine, init_db
@@ -79,7 +79,7 @@ def ls() -> None:
     table.add_column("hits", justify="right", style="magenta")
     table.add_column("created", style="dim")
     with Session(get_engine()) as session:
-        rows = session.exec(select(Link).order_by(Link.created_at.desc())).all()
+        rows = session.exec(select(Link).order_by(col(Link.created_at).desc())).all()
     for r in rows:
         table.add_row(
             r.slug,
@@ -137,7 +137,7 @@ def export_(path: Path = typer.Argument(..., help="Output CSV path")) -> None:
     """Dump every link to a CSV file."""
     init_db()
     with Session(get_engine()) as session:
-        rows = session.exec(select(Link).order_by(Link.created_at)).all()
+        rows = session.exec(select(Link).order_by(col(Link.created_at))).all()
     with path.open("w", newline="") as fh:
         writer = csv.writer(fh)
         writer.writerow(["slug", "target", "created_at", "hits"])
@@ -172,7 +172,7 @@ def stats(
 ) -> None:
     """Print a per-day hit histogram for the slug over the last N days."""
     init_db()
-    today = datetime.now(timezone.utc).date()
+    today = datetime.now(UTC).date()
     start = today - timedelta(days=days - 1)
     with Session(get_engine()) as session:
         if session.get(Link, slug) is None:

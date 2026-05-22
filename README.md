@@ -1,117 +1,146 @@
-# 🔗 shortlink
+# shortlink
 
-> **Your own self-hosted URL shortener.**
-> FastAPI + SQLite + a tiny admin CLI. Runs on a $5 VPS.
+A self-hosted URL shortener built around FastAPI, SQLite and a small `typer`
+admin CLI. It is designed to run on a single small VPS behind Caddy or Nginx
+and to be installable as a single binary via `pipx`.
 
-Turn long URLs into short, branded ones (`https://ymi.link/x9k2`) on a domain
-you control — without sending traffic data to a third-party service.
+[![CI](https://github.com/KPbICO6Ou/ShortLink/actions/workflows/ci.yml/badge.svg)](https://github.com/KPbICO6Ou/ShortLink/actions/workflows/ci.yml)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](#license)
 
----
+## Features
 
-## ✨ Features
+- `GET /{slug}` redirects to the stored URL with `307 Temporary Redirect`
+- SQLite storage via `sqlmodel`; no external database required
+- Base62 slug generator, with optional custom slugs
+- Per-link hit counter plus a per-day hit table for histograms
+- Admin HTTP API at `/api/links`, gated by an `X-Admin-Token` header
+- `GET /qr/{slug}` returns a PNG QR code for the short URL
+- `shortlink` CLI: `add`, `ls`, `rm`, `rename`, `stats`, `health`,
+  `export`, `import`, `init`
+- Production deployment artefacts: `systemd` unit, Caddy and Nginx samples,
+  Dockerfile, `docker-compose.yml`, nightly backup script
 
-- ⚡ **FastAPI** redirect endpoint with `307 Temporary Redirect`
-- 💾 **SQLite** storage via `sqlmodel` (typed ORM, single file)
-- 🔢 **base62** auto-generated slugs, or pick your own (`--slug asr`)
-- 📊 Per-link click counter and daily stats
-- 🧑‍💻 Admin **CLI** (`typer`) — add / list / remove / rename from the terminal
-- 🏥 `--health` flag pings every target URL and flags dead links
+## Requirements
 
----
+- Python 3.11 or newer
+- SQLite (bundled with Python)
 
-## 🚀 Quick start
+## Installation
+
+From source, into an isolated environment:
 
 ```bash
-# install
-uv pip install -e .
+git clone https://github.com/KPbICO6Ou/ShortLink.git
+cd ShortLink
+pipx install .
+```
 
-# init the database
+For development work, install in editable mode with the dev extras:
+
+```bash
+pip install -e ".[dev]"
+```
+
+## Quick start
+
+```bash
+# Initialise the database at $SHORTLINK_DB_PATH (defaults to ./shortlink.sqlite)
 shortlink init
 
-# add a link (auto-generated slug)
-shortlink add https://github.com/yumiaura/myCat
-# → http://localhost:8000/4Kx9  →  github.com/yumiaura/myCat
+# Add a link with an auto-generated base62 slug
+shortlink add https://example.com/some/long/path
+# → http://localhost:8000/4Kx9  →  https://example.com/some/long/path
 
-# or pick your own slug
-shortlink add https://github.com/yumiaura/Qwen3ASRDemo --slug asr
+# Or pick the slug yourself
+shortlink add https://example.com/blog --slug blog
 
-# run the server
+# Serve the redirect endpoint
 uvicorn shortlink:app --host 0.0.0.0 --port 8000
 ```
 
----
+## CLI reference
 
-## 🧑‍💻 Admin CLI
+| Command                         | Description                                        |
+| ------------------------------- | -------------------------------------------------- |
+| `shortlink init`                | Create the database file and schema                |
+| `shortlink add <url> [--slug]`  | Add a link; generates a slug if `--slug` is absent |
+| `shortlink ls`                  | List every link as a rich table                    |
+| `shortlink rm <slug>`           | Delete a link                                      |
+| `shortlink rename <old> <new>`  | Move a link to a new slug                          |
+| `shortlink stats <slug> -d N`   | Per-day click histogram over the last N days       |
+| `shortlink health`              | HEAD-check every target URL; exit non-zero on dead |
+| `shortlink export <path>`       | Dump every link to CSV                             |
+| `shortlink import <path>`       | Bulk-add from a CSV produced by `export`           |
 
-```bash
-shortlink ls
-# slug   target                              hits   created
-# asr    github.com/yumiaura/Qwen3ASRDemo      42   2026-05-22
-# 4Kx9   github.com/yumiaura/myCat            118   2026-05-15
+## HTTP API
 
-shortlink stats asr --days 7        # daily click histogram
-shortlink rm 4Kx9                   # delete a link
-shortlink rename asr whisper        # change a slug
-shortlink health                    # check every target with HEAD requests
-shortlink export links.csv          # dump everything
-```
+| Method   | Path                  | Auth        | Description                       |
+| -------- | --------------------- | ----------- | --------------------------------- |
+| `GET`    | `/{slug}`             | public      | Redirect to target; increment hits |
+| `GET`    | `/qr/{slug}`          | public      | PNG QR code for the short URL     |
+| `GET`    | `/api/links`          | admin token | List all links                    |
+| `POST`   | `/api/links`          | admin token | Create a link                     |
+| `DELETE` | `/api/links/{slug}`   | admin token | Delete a link                     |
 
----
+Admin endpoints require an `X-Admin-Token` header that matches
+`SHORTLINK_ADMIN_TOKEN`. Requests without it return `401`.
 
-## 🌐 HTTP API
+The OpenAPI schema and Swagger UI are disabled by default. Set
+`SHORTLINK_ENABLE_DOCS=1` to expose `/docs`, `/redoc` and `/openapi.json` —
+the Caddy and Nginx samples in `deploy/` block those paths regardless, so
+production exposure is opt-in on both layers.
 
-| Method | Path             | Description |
-|--------|------------------|-------------|
-| `GET`  | `/<slug>`        | Redirect to the target URL, increments hit counter |
-| `GET`  | `/api/links`     | List all links (admin-token protected) |
-| `POST` | `/api/links`     | Create a new link |
-| `DELETE` | `/api/links/<slug>` | Remove a link |
+## Configuration
 
-Admin routes require `X-Admin-Token` header matching `SHORTLINK_ADMIN_TOKEN`.
+All settings are read from environment variables with the `SHORTLINK_`
+prefix (or a `.env` file in the working directory):
 
----
+| Variable                  | Default                | Purpose                                    |
+| ------------------------- | ---------------------- | ------------------------------------------ |
+| `SHORTLINK_DB_PATH`       | `shortlink.sqlite`     | SQLite database file path                  |
+| `SHORTLINK_BASE_URL`      | `http://localhost:8000`| Used by the CLI when printing short URLs   |
+| `SHORTLINK_ADMIN_TOKEN`   | `change-me-please`     | Required value of the `X-Admin-Token` header |
+| `SHORTLINK_SLUG_LENGTH`   | `4`                    | Length of auto-generated base62 slugs      |
+| `SHORTLINK_ENABLE_DOCS`   | `false`                | Expose `/docs`, `/redoc`, `/openapi.json`  |
 
-## ⚙️ Configuration
+## Deployment
 
-Environment variables (or `.env`):
+Ready-to-use samples live in `deploy/`:
 
-```bash
-SHORTLINK_DB_PATH=/var/lib/shortlink/db.sqlite
-SHORTLINK_BASE_URL=https://ymi.link
-SHORTLINK_ADMIN_TOKEN=change-me-please
-SHORTLINK_SLUG_LENGTH=4
-```
+- `deploy/shortlink.service` — `systemd` user unit
+- `deploy/Caddyfile` — TLS-terminating reverse proxy
+- `deploy/nginx.conf` — alternative reverse proxy
+- `deploy/backup.sh` — nightly snapshot using `sqlite3 .backup`
 
----
-
-## 🚢 Deployment
-
-Behind Caddy on any small VPS:
+A minimal Caddy setup:
 
 ```caddy
-ymi.link {
+links.example.com {
     reverse_proxy localhost:8000
 }
 ```
 
-Then `systemctl --user enable --now shortlink.service` (unit file provided).
+A container image is provided as well:
 
----
+```bash
+docker compose up -d
+```
 
-## 📦 Stack
+## Development
 
-`fastapi`, `uvicorn`, `sqlmodel`, `typer`, `httpx`, `pydantic-settings`
+The repository ships three CI gates; all three must stay green:
 
----
+```bash
+PYTHONPATH=src ruff check src tests
+PYTHONPATH=src mypy
+PYTHONPATH=src pytest -q
+```
 
-## 🗺️ Roadmap
+Tests run against a throwaway SQLite database and never touch the network.
 
-See [ROADMAP.md](ROADMAP.md).
+## License
 
----
+MIT.
 
-## 📄 License
-
-MIT (planned).
-
-Author: [@yumiaura](https://github.com/yumiaura)
+See [CHANGELOG.md](CHANGELOG.md) for release history.

@@ -1,3 +1,5 @@
+import secrets
+
 from fastapi import APIRouter, Depends, Header, HTTPException, status
 from sqlmodel import Session, col, select
 
@@ -14,7 +16,17 @@ def require_admin(
     x_admin_token: str | None = Header(default=None),
     settings: Settings = Depends(get_settings),
 ) -> None:
-    if x_admin_token != settings.admin_token:
+    # Refuse to authenticate at all when no token is configured — otherwise an
+    # operator who forgot to set SHORTLINK_ADMIN_TOKEN would expose admin
+    # endpoints to anyone who can send an empty X-Admin-Token header.
+    if not settings.admin_token:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="admin API disabled: SHORTLINK_ADMIN_TOKEN is not configured",
+        )
+    if not x_admin_token or not secrets.compare_digest(
+        x_admin_token, settings.admin_token
+    ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="invalid or missing admin token",

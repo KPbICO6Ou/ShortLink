@@ -100,7 +100,7 @@ prefix (or a `.env` file in the working directory):
 | ------------------------- | ---------------------- | ------------------------------------------ |
 | `SHORTLINK_DB_PATH`       | `shortlink.sqlite`     | SQLite database file path                  |
 | `SHORTLINK_BASE_URL`      | `http://localhost:8000`| Used by the CLI when printing short URLs   |
-| `SHORTLINK_ADMIN_TOKEN`   | `change-me-please`     | Required value of the `X-Admin-Token` header |
+| `SHORTLINK_ADMIN_TOKEN`   | _(unset)_              | Required value of the `X-Admin-Token` header. The admin API returns `503` until this is set. Use `deploy/setup.py` to mint one. |
 | `SHORTLINK_SLUG_LENGTH`   | `4`                    | Length of auto-generated base62 slugs      |
 | `SHORTLINK_ENABLE_DOCS`   | `false`                | Expose `/docs`, `/redoc`, `/openapi.json`  |
 

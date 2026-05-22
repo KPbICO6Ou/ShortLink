@@ -4,24 +4,24 @@ from sqlmodel import Session, SQLModel, create_engine
 
 from shortlink.config import get_settings
 
-_engine = None
+engine = None
 
 
 def get_engine():
-    global _engine
-    if _engine is None:
+    global engine
+    if engine is None:
         settings = get_settings()
-        _engine = create_engine(
+        engine = create_engine(
             settings.db_url,
             connect_args={"check_same_thread": False},
         )
-    return _engine
+    return engine
 
 
 def reset_engine() -> None:
     """Force re-creation of the engine — useful for tests that swap DB paths."""
-    global _engine
-    _engine = None
+    global engine
+    engine = None
 
 
 def init_db() -> None:

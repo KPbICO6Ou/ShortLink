@@ -14,7 +14,7 @@ from shortlink.qr import router as qr_router
 
 
 @asynccontextmanager
-async def _lifespan(_: FastAPI) -> AsyncIterator[None]:
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     init_db()
     yield
 
@@ -37,7 +37,7 @@ def create_app() -> FastAPI:
         docs_url=docs_url,
         redoc_url=redoc_url,
         openapi_url=openapi_url,
-        lifespan=_lifespan,
+        lifespan=lifespan,
     )
 
     application.include_router(admin_router)

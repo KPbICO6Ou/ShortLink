@@ -18,11 +18,11 @@ console = Console()
 
 
 @app.callback()
-def _root() -> None:
+def root_callback() -> None:
     """Group entrypoint — forces typer to keep subcommand routing on."""
 
 
-def _validate_url(raw: str) -> str:
+def validate_url(raw: str) -> str:
     """Parse the URL and reject anything that is not http(s)://host."""
     try:
         url = httpx.URL(raw)
@@ -48,7 +48,7 @@ def add(
     slug: str | None = typer.Option(None, "--slug", "-s", help="Custom slug"),
 ) -> None:
     """Add a new link. Generates a base62 slug if --slug is not given."""
-    target = _validate_url(target)
+    target = validate_url(target)
     settings = get_settings()
     init_db()
     with Session(get_engine()) as session:

@@ -2,7 +2,6 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field, HttpUrl
 
-
 SLUG_PATTERN = r"^[A-Za-z0-9_-]+$"
 
 

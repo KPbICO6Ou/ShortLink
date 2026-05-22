@@ -2,7 +2,7 @@
 # Caddy will obtain a Let's Encrypt cert automatically the first time
 # the hostname resolves to this machine.
 
-ymi.link {
+links.example.com {
     encode gzip zstd
 
     # Hide the admin surface from the public internet. Adjust to your

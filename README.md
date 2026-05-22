@@ -1,4 +1,4 @@
-# shortlink
+# shortLink
 
 A self-hosted URL shortener built around FastAPI, SQLite and a small `typer`
 admin CLI. It is designed to run on a single small VPS behind Caddy or Nginx
